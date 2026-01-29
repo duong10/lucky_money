@@ -1,6 +1,5 @@
-
 import 'package:flutter/material.dart';
-import 'package:lucky_money/presenation/page/page1.dart';
+import 'package:lucky_money/presenation/page/add_page.dart';
 
 class CustomBottom extends StatefulWidget {
   const CustomBottom({super.key});
@@ -10,31 +9,33 @@ class CustomBottom extends StatefulWidget {
 }
 
 class _CustomBottomState extends State<CustomBottom> {
-  List<bool> isSelected = [ true, false];
+  List<bool> isSelected = [true, false];
   bool isOn = false;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(backgroundColor: Colors.grey,),
+      appBar: AppBar(backgroundColor: Colors.grey),
       bottomNavigationBar: Container(
         padding: EdgeInsets.symmetric(horizontal: 48, vertical: 16),
-        height: MediaQuery.sizeOf(context).height*0.14,
+        height: MediaQuery.sizeOf(context).height * 0.14,
         color: Colors.black12,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Icon(Icons.share,),
+            Icon(Icons.share),
             InkWell(
               child: Icon(Icons.add_card),
-              onTap: (){Navigator.push(
-                context,
-                PageRouteBuilder(
-                  opaque: false, // quan trọng
-                  pageBuilder: (_, __, ___) => const FakeBottomSheetPage(),
-                ),
-              );
+              onTap: () {
+                Navigator.push(
+                  context,
+                  PageRouteBuilder(
+                    opaque: false, // quan trọng
+                    pageBuilder: (_, __, ___) => const AddPage(),
+                  ),
+                );
               },
+
               //     () {
               //   showModalBottomSheet(
               //     shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(8))),
@@ -49,37 +50,36 @@ class _CustomBottomState extends State<CustomBottom> {
               //     },
               //   );
               // },
-
             ),
           ],
         ),
       ),
       body: SafeArea(
-          child: Container(
-              color: Colors.white60,
-              child: Column(
-                children: [
-                  ToggleButtons(
-                      onPressed: (index) {
-                        setState(() {
-                          isSelected = [index == 0, index == 1];
-                        });
-                      },
-                      children: [Text('on'),
-                        Text('off')], isSelected: isSelected),
-                  Switch(
-                    value: isOn,
-                    activeColor: Colors.green,
-                    inactiveThumbColor: Colors.grey,
-                    inactiveTrackColor: Colors.grey.shade300,
-                    onChanged: (value) {
-                      setState(() => isOn = value);
-                    },
-                  )
-
-                ],
-              )
-          )
+        child: Container(
+          color: Colors.white60,
+          child: Column(
+            children: [
+              ToggleButtons(
+                onPressed: (index) {
+                  setState(() {
+                    isSelected = [index == 0, index == 1];
+                  });
+                },
+                children: [Text('on'), Text('off')],
+                isSelected: isSelected,
+              ),
+              Switch(
+                value: isOn,
+                activeColor: Colors.green,
+                inactiveThumbColor: Colors.grey,
+                inactiveTrackColor: Colors.grey.shade300,
+                onChanged: (value) {
+                  setState(() => isOn = value);
+                },
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
