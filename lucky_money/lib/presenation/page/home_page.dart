@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:lucky_money/app/navigation/router_location.dart';
 
 import '../widget/card.dart';
+import 'add_page.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -68,7 +69,8 @@ class HomePage extends StatelessWidget {
             InkWell(
               child: Icon(Icons.add),
               onTap: () {
-                context.pushNamed(AppRouterLocation.add.name);
+                AddPage.show(context);
+                // context.pushNamed(AppRouterLocation.add.name);
 
                 // Navigator.push(
                 //   context,
