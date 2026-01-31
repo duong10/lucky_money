@@ -1,18 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
-class itemCard extends StatelessWidget {
-  const itemCard({super.key, required this.onTap});
+import '../../data/models/obj_money.dart';
 
+class ItemCard extends StatelessWidget {
+  const ItemCard({super.key, required this.item, required this.onTap});
+
+  final ObjMoney item;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
+    final currencyFormatter = NumberFormat.currency(
+      locale: 'vi_VN',
+      symbol: 'đ',
+    );
+    final amountString = currencyFormatter.format(item.amount);
+    final color = item.isGive ? Colors.red : Colors.green;
+    final prefix = item.isGive ? '+' : '-';
+
     return Card(
-      //elevation: 1,
       color: Colors.black,
-      // shape: RoundedRectangleBorder(,borderRadius: BorderRadius.circular(12)),
       child: InkWell(
-        //borderRadius: BorderRadius.circular(12),
         onTap: onTap,
         child: Column(
           children: [
@@ -22,15 +31,16 @@ class itemCard extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Task',
+                    item.name,
                     style: TextStyle(color: Colors.white, fontSize: 22),
                   ),
                   Row(
                     children: [
                       Text(
-                        '+đ0',
-                        style: TextStyle(color: Colors.white38, fontSize: 18),
+                        '$prefix$amountString',
+                        style: TextStyle(color: color, fontSize: 18),
                       ),
+                      const SizedBox(width: 8),
                       Icon(
                         Icons.arrow_forward_ios,
                         color: Colors.white38,
