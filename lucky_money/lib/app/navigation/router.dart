@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucky_money/app/navigation/router_location.dart';
+import 'package:lucky_money/data/models/obj_money.dart';
 import 'package:lucky_money/presenation/page/add_page.dart';
 import 'package:lucky_money/presenation/page/home_page.dart';
 import 'package:lucky_money/presenation/page/item_page.dart';
@@ -27,7 +28,8 @@ abstract class AppRouter {
         path: AppRouterLocation.item.path,
         name: AppRouterLocation.item.name,
         pageBuilder: (context, state) {
-          return CupertinoPage(child: const ItemPage());
+          final objMoney = state.extra as ObjMoney;
+          return CupertinoPage(child: ItemPage(objMoney: objMoney));
         },
       ),
     ],

@@ -1,71 +1,109 @@
 import 'package:flutter/material.dart';
-import 'package:lucky_money/presenation/widget/card.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:lucky_money/data/models/obj_money.dart';
+import 'package:lucky_money/presenation/bloc/money_bloc.dart';
+import 'package:lucky_money/presenation/widget/item_card_detail.dart';
+
+import 'add_page.dart';
 
 class ItemPage extends StatelessWidget {
-  const ItemPage({super.key});
+  const ItemPage({super.key, required this.objMoney});
+
+  final ObjMoney objMoney;
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.black,
-      appBar: AppBar(
-        backgroundColor: Colors.black,
-        // leading: Row(children: [Icon(Icons.arrow_back_ios)]),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Container(
-              padding: EdgeInsets.only(right: 8),
-              child: InkWell(
-                onTap: () {},
-                child: Text(
-                  'Edit',
-                  style: TextStyle(color: Colors.blue, fontSize: 22),
+    return BlocBuilder<MoneyBloc, MoneyState>(
+      builder: (context, state) {
+        // Tìm đối tượng ObjMoney mới nhất trong state dựa vào name
+        final currentObjMoney = state.listObjMoney.firstWhere(
+          (element) => element.name == objMoney.name,
+          orElse: () => objMoney,
+        );
+
+        return Scaffold(
+          backgroundColor: Colors.black,
+          appBar: AppBar(
+            backgroundColor: Colors.black,
+            actions: [
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Container(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: InkWell(
+                    onTap: () {},
+                    child: const Text(
+                      'Edit',
+                      style: TextStyle(color: Colors.blue, fontSize: 22),
+                    ),
+                  ),
                 ),
               ),
+            ],
+          ),
+          body: LayoutBuilder(
+            builder: (context, constraints) {
+              return SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    minHeight: constraints.maxHeight,
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          currentObjMoney.name,
+                          style: const TextStyle(color: Colors.white, fontSize: 30),
+                        ),
+                        const SizedBox(height: 12),
+                        const Divider(
+                          thickness: 0.2,
+                          height: 0.2,
+                          color: Colors.grey,
+                        ),
+                        ListView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: currentObjMoney.transactions.length,
+                          itemBuilder: (context, index) {
+                            final transaction = currentObjMoney.transactions[index];
+                            return ItemCardDetail(
+                              transaction: transaction,
+                              onTap: () => showBotton(context),
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+          bottomNavigationBar: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 0),
+            height: MediaQuery.sizeOf(context).height * 0.08,
+            color: Colors.grey.shade900,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Icon(Icons.settings_rounded),
+                InkWell(
+                  child: const Icon(Icons.add),
+                  onTap: () {
+                    AddPage.show(context, objMoney: currentObjMoney);
+                  },
+                ),
+              ],
             ),
           ),
-        ],
-      ),
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          return SingleChildScrollView(
-            physics: AlwaysScrollableScrollPhysics(),
-            child: ConstrainedBox(
-              // height: double.minPositive,
-              constraints: BoxConstraints(minHeight: constraints.maxHeight),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Title',
-                      style: TextStyle(color: Colors.white, fontSize: 30),
-                    ),
-                    SizedBox(height: 12),
-                    Divider(thickness: 0.2, height: 0.2, color: Colors.grey),
-                    itemCard(onTap: () => showBotton(context)),
-                  ],
-                ),
-              ),
-            ),
-          );
-        },
-      ),
-      bottomNavigationBar: Container(
-        padding: EdgeInsets.symmetric(horizontal: 32, vertical: 0),
-        height: MediaQuery.sizeOf(context).height * 0.08,
-        color: Colors.grey.shade900,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Icon(Icons.settings_rounded),
-            InkWell(child: Icon(Icons.add), onTap: () {}),
-          ],
-        ),
-      ),
+        );
+      },
     );
+
   }
 
   Future<dynamic> showBotton(BuildContext context) {

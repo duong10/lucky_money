@@ -1,18 +1,27 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:lucky_money/data/models/obj_money.dart';
+import 'package:lucky_money/data/models/transaction.dart';
 
+import '../bloc/money_bloc.dart';
 import 'currency_page.dart';
 
 class AddPage extends StatefulWidget {
-  const AddPage({super.key});
+  const AddPage({super.key, this.objMoney});
 
-  static Future<void> show(BuildContext context) async {
+  final ObjMoney? objMoney;
+
+  static Future<void> show(BuildContext context, {ObjMoney? objMoney}) async {
     await showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => const AddPage(),
+      builder:
+          objMoney != null
+              ? (context) => AddPage(objMoney: objMoney)
+              : (context) => AddPage(),
     );
   }
 
@@ -25,9 +34,17 @@ class _AddPageState extends State<AddPage> {
   final TextEditingController _commentController = TextEditingController();
   final TextEditingController _amountController = TextEditingController();
   final TextEditingController _nameController = TextEditingController();
-  final DateFormat formatter = DateFormat('dd/MM/yyyy');
+  final DateFormat formatter = DateFormat('d MMM yyyy', 'en_US');
   DateTime selectedDate = DateTime.now();
   DateTime pickedDate = DateTime.now();
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.objMoney != null) {
+      _nameController.text = widget.objMoney!.name;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,7 +67,7 @@ class _AddPageState extends State<AddPage> {
             // elevation: 0,
             centerTitle: true,
             title: const Text(
-              'Add Debt',
+              'Add Transaction',
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 17, // Standard iOS title size
@@ -68,7 +85,24 @@ class _AddPageState extends State<AddPage> {
             actions: [
               TextButton(
                 onPressed: () {
-                  // Handle Done
+                  final name = _nameController.text;
+                  final amountString = _amountController.text;
+                  final amount = double.tryParse(amountString) ?? 0.0;
+                  final comment = _commentController.text;
+
+                  if (name.isNotEmpty && amount > 0) {
+                    final item = Transaction(
+                      amount: amount,
+                      date: selectedDate,
+                      comment: comment,
+                      isGive: isGive,
+                    );
+
+                    context.read<MoneyBloc>().add(
+                      AddTransactionEvent(name: name, transactionItem: item),
+                    );
+                    Navigator.pop(context);
+                  }
                 },
                 child: Text(
                   'Done',
@@ -164,13 +198,6 @@ class _AddPageState extends State<AddPage> {
                         hintStyle: TextStyle(color: Colors.grey),
                         //contentPadding: EdgeInsets.only(top: 8),
                       ),
-                      onSubmitted: (value) {
-                        if (value.isNotEmpty) {
-                          setState(() {
-                            _nameController.clear();
-                          });
-                        }
-                      },
                     ),
                   ],
                 ),
@@ -197,13 +224,6 @@ class _AddPageState extends State<AddPage> {
                         hintStyle: TextStyle(color: Colors.grey),
                         //contentPadding: EdgeInsets.only(top: 8),
                       ),
-                      onSubmitted: (value) {
-                        if (value.isNotEmpty) {
-                          setState(() {
-                            _nameController.clear();
-                          });
-                        }
-                      },
                     ),
                     Divider(thickness: 0.2, height: 0.2, color: Colors.grey),
                     GestureDetector(

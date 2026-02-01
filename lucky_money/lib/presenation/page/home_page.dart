@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucky_money/app/navigation/router_location.dart';
 
-import '../widget/card.dart';
+import '../bloc/money_bloc.dart';
+import '../widget/item_card.dart';
 import 'add_page.dart';
 
 class HomePage extends StatelessWidget {
@@ -22,7 +24,7 @@ class HomePage extends StatelessWidget {
               child: InkWell(
                 onTap: () {},
                 child: Text(
-                  'Done',
+                  'Edit',
                   style: TextStyle(color: Colors.blue, fontSize: 22),
                 ),
               ),
@@ -30,31 +32,65 @@ class HomePage extends StatelessWidget {
           ),
         ],
       ),
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          return SingleChildScrollView(
-            physics: AlwaysScrollableScrollPhysics(),
-            child: ConstrainedBox(
-              constraints: BoxConstraints(minHeight: constraints.maxHeight),
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'LuckyMoney',
-                      style: TextStyle(color: Colors.white, fontSize: 30),
+      body: BlocBuilder<MoneyBloc, MoneyState>(
+        // buildWhen:
+        //     (previous, current) =>
+        //         previous.listObjMoney != current.listObjMoney ||
+        //         previous.listObjMoney.map((e) => e.transactions.length) !=
+        //             current.listObjMoney.map((e) => e.transactions.length),
+        builder: (context, state) {
+          return LayoutBuilder(
+            builder: (context, constraints) {
+              return SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'LuckyMoney',
+                          style: TextStyle(color: Colors.white, fontSize: 30),
+                        ),
+                        const SizedBox(height: 12),
+                        const Divider(
+                          thickness: 0.2,
+                          height: 0.2,
+                          color: Colors.grey,
+                        ),
+                        if (state.listObjMoney.isEmpty)
+                          const Padding(
+                            padding: EdgeInsets.only(top: 20),
+                            child: Text(
+                              'No Data',
+                              style: TextStyle(color: Colors.white54),
+                            ),
+                          )
+                        else
+                          ListView.builder(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            itemCount: state.listObjMoney.length,
+                            itemBuilder: (context, index) {
+                              final objMoney = state.listObjMoney[index];
+                              return ItemCard(
+                                objMoney: objMoney,
+                                onTap:
+                                    () => context.pushNamed(
+                                      AppRouterLocation.item.name,
+                                      extra: objMoney,
+                                    ),
+                              );
+                            },
+                          ),
+                      ],
                     ),
-                    SizedBox(height: 12),
-                    Divider(thickness: 0.2, height: 0.2, color: Colors.grey),
-                    itemCard(
-                      onTap:
-                          () => context.pushNamed(AppRouterLocation.item.name),
-                    ),
-                  ],
+                  ),
                 ),
-              ),
-            ),
+              );
+            },
           );
         },
       ),
