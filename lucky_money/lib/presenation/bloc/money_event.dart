@@ -20,6 +20,11 @@ class AddTransactionEvent extends MoneyEvent {
   List<Object> get props => [name, transactionItem];
 }
 
+class IsEditEvent extends MoneyEvent {
+  final bool isEdit;
+  const IsEditEvent({required this.isEdit});
+}
+
 class AddObjMoneyEvent extends MoneyEvent {
   final ObjMoney objMoney;
 

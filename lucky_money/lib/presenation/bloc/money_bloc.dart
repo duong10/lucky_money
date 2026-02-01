@@ -11,6 +11,7 @@ class MoneyBloc extends HydratedBloc<MoneyEvent, MoneyState> {
   MoneyBloc() : super(const MoneyState()) {
     on<AddTransactionEvent>(_onAddTransaction);
     on<AddObjMoneyEvent>(_onAddObjMoneyEvent);
+    on<IsEditEvent>(_onIsEditEvent);
   }
 
   void _onAddTransaction(AddTransactionEvent event, Emitter<MoneyState> emit) {
@@ -19,7 +20,6 @@ class MoneyBloc extends HydratedBloc<MoneyEvent, MoneyState> {
     );
 
     if (existingIndex != -1) {
-      // Update existing person's transactions
       final existingObj = state.listObjMoney[existingIndex];
       final newTransactions = List<Transaction>.from(existingObj.transactions)
         ..add(event.transactionItem);
@@ -27,20 +27,23 @@ class MoneyBloc extends HydratedBloc<MoneyEvent, MoneyState> {
 
       final newList = List<ObjMoney>.from(state.listObjMoney);
       newList[existingIndex] = newObj;
-      emit(MoneyState(listObjMoney: newList));
+      emit(state.copyWith(listObjMoney: newList));
     } else {
-      // Create new person
       final newObj = ObjMoney(
         name: event.name,
         transactions: [event.transactionItem],
       );
       final newList = List<ObjMoney>.from(state.listObjMoney)..add(newObj);
-      emit(MoneyState(listObjMoney: newList));
+      emit(state.copyWith(listObjMoney: newList));
     }
   }
 
   void _onAddObjMoneyEvent(AddObjMoneyEvent event, Emitter<MoneyState> emit) {
-    emit(MoneyState(objMoney: event.objMoney));
+    emit(state.copyWith(objMoney: event.objMoney));
+  }
+
+  void _onIsEditEvent(IsEditEvent event, Emitter<MoneyState> emit) {
+    emit(state.copyWith(isEdit: event.isEdit));
   }
 
   @override

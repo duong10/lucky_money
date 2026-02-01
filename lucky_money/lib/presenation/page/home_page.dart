@@ -12,34 +12,34 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.black,
-      appBar: AppBar(
-        backgroundColor: Colors.black,
-        actions: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Container(
-              padding: EdgeInsets.only(right: 8),
-              child: InkWell(
-                onTap: () {},
-                child: Text(
-                  'Edit',
-                  style: TextStyle(color: Colors.blue, fontSize: 22),
+    return BlocBuilder<MoneyBloc, MoneyState>(
+      builder: (context, state) {
+        return Scaffold(
+          backgroundColor: Colors.black,
+          appBar: AppBar(
+            backgroundColor: Colors.black,
+            actions: [
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Container(
+                  padding: EdgeInsets.only(right: 8),
+                  child: InkWell(
+                    highlightColor: Colors.transparent,
+                    splashColor: Colors.transparent,
+                    onTap:
+                        () => context.read<MoneyBloc>().add(
+                          IsEditEvent(isEdit: !(state.isEdit ?? false)),
+                        ),
+                    child: Text(
+                      (state.isEdit ?? false) ? 'Done' : 'Edit',
+                      style: TextStyle(color: Colors.blue, fontSize: 22),
+                    ),
+                  ),
                 ),
               ),
-            ),
+            ],
           ),
-        ],
-      ),
-      body: BlocBuilder<MoneyBloc, MoneyState>(
-        // buildWhen:
-        //     (previous, current) =>
-        //         previous.listObjMoney != current.listObjMoney ||
-        //         previous.listObjMoney.map((e) => e.transactions.length) !=
-        //             current.listObjMoney.map((e) => e.transactions.length),
-        builder: (context, state) {
-          return LayoutBuilder(
+          body: LayoutBuilder(
             builder: (context, constraints) {
               return SingleChildScrollView(
                 physics: const AlwaysScrollableScrollPhysics(),
@@ -91,35 +91,35 @@ class HomePage extends StatelessWidget {
                 ),
               );
             },
-          );
-        },
-      ),
-      bottomNavigationBar: Container(
-        padding: EdgeInsets.symmetric(horizontal: 32, vertical: 0),
-        height: MediaQuery.sizeOf(context).height * 0.08,
-        color: Colors.grey.shade900,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Icon(Icons.share),
-            InkWell(
-              child: Icon(Icons.add),
-              onTap: () {
-                AddPage.show(context);
-                // context.pushNamed(AppRouterLocation.add.name);
+          ),
+          bottomNavigationBar: Container(
+            padding: EdgeInsets.symmetric(horizontal: 32, vertical: 0),
+            height: MediaQuery.sizeOf(context).height * 0.08,
+            color: Colors.grey.shade900,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Icon(Icons.share),
+                InkWell(
+                  child: Icon(Icons.add),
+                  onTap: () {
+                    AddPage.show(context);
+                    // context.pushNamed(AppRouterLocation.add.name);
 
-                // Navigator.push(
-                //   context,
-                //   PageRouteBuilder(
-                //     opaque: false, // quan trọng
-                //     pageBuilder: (_, __, ___) => const AddPage(),
-                //   ),
-                // );
-              },
+                    // Navigator.push(
+                    //   context,
+                    //   PageRouteBuilder(
+                    //     opaque: false, // quan trọng
+                    //     pageBuilder: (_, __, ___) => const AddPage(),
+                    //   ),
+                    // );
+                  },
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 }

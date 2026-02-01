@@ -3,21 +3,28 @@ part of 'money_bloc.dart';
 class MoneyState extends Equatable {
   final List<ObjMoney> listObjMoney;
   final ObjMoney? objMoney;
+  final bool? isEdit;
 
-  const MoneyState({this.listObjMoney = const [], this.objMoney});
+  const MoneyState({
+    this.listObjMoney = const [],
+    this.objMoney,
+    this.isEdit = false,
+  });
 
   MoneyState copyWith({
     List<ObjMoney>? listObjMoney,
     ObjMoney? objMoney,
+    bool? isEdit,
   }) {
     return MoneyState(
       listObjMoney: listObjMoney ?? this.listObjMoney,
       objMoney: objMoney ?? this.objMoney,
+      isEdit: isEdit ?? this.isEdit,
     );
   }
 
   @override
-  List<Object?> get props => [listObjMoney, objMoney];
+  List<Object?> get props => [listObjMoney, objMoney, isEdit];
 
   Map<String, dynamic> toJson() {
     return {
@@ -40,4 +47,3 @@ class MoneyState extends Equatable {
     );
   }
 }
-
