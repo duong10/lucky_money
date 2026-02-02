@@ -1,17 +1,26 @@
 import 'package:equatable/equatable.dart';
 
 class Transaction extends Equatable {
+  final int? idTransaction;
   final double amount;
   final DateTime date;
   final String comment;
   final bool isGive;
 
   Transaction({
+    int? idTransaction,
     required this.amount,
     required this.date,
     required this.comment,
     required this.isGive,
-  });
+  }) : idTransaction = idTransaction ?? _generateIdTransaction();
+
+  static int _generateIdTransaction() {
+    final now = DateTime.now().millisecondsSinceEpoch;
+    final random =
+        DateTime.now().microsecond * 1000 + DateTime.now().millisecond + 18;
+    return now + random;
+  }
 
   @override
   List<Object?> get props => [amount, date, comment, isGive];
@@ -34,4 +43,3 @@ class Transaction extends Equatable {
     );
   }
 }
-

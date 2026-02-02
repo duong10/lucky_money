@@ -10,6 +10,7 @@ part 'money_state.dart';
 class MoneyBloc extends HydratedBloc<MoneyEvent, MoneyState> {
   MoneyBloc() : super(const MoneyState()) {
     on<AddTransactionEvent>(_onAddTransaction);
+    on<RemoveObjEvent>(_onRemoveObjEvent);
     on<AddObjMoneyEvent>(_onAddObjMoneyEvent);
     on<IsEditEvent>(_onIsEditEvent);
   }
@@ -38,12 +39,23 @@ class MoneyBloc extends HydratedBloc<MoneyEvent, MoneyState> {
     }
   }
 
+  void _onRemoveObjEvent(RemoveObjEvent event, Emitter<MoneyState> emit) {
+    final existingIndex = state.listObjMoney.indexWhere(
+      (e) => e.id == event.id,
+    );
+
+    final removeObj = state.listObjMoney[existingIndex];
+    final newList = List<ObjMoney>.from(state.listObjMoney)..remove(removeObj);
+
+    emit(state.copyWith(listObjMoney: newList));
+  }
+
   void _onAddObjMoneyEvent(AddObjMoneyEvent event, Emitter<MoneyState> emit) {
     emit(state.copyWith(objMoney: event.objMoney));
   }
 
   void _onIsEditEvent(IsEditEvent event, Emitter<MoneyState> emit) {
-    emit(state.copyWith(isEdit: event.isEdit));
+    emit(state.copyWith(isEdit: event.isEdit, isEditItem: event.isEditItem));
   }
 
   @override

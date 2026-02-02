@@ -4,27 +4,31 @@ class MoneyState extends Equatable {
   final List<ObjMoney> listObjMoney;
   final ObjMoney? objMoney;
   final bool? isEdit;
+  final bool? isEditItem;
 
   const MoneyState({
     this.listObjMoney = const [],
     this.objMoney,
     this.isEdit = false,
+    this.isEditItem = false,
   });
 
   MoneyState copyWith({
     List<ObjMoney>? listObjMoney,
     ObjMoney? objMoney,
     bool? isEdit,
+    bool? isEditItem,
   }) {
     return MoneyState(
       listObjMoney: listObjMoney ?? this.listObjMoney,
       objMoney: objMoney ?? this.objMoney,
       isEdit: isEdit ?? this.isEdit,
+      isEditItem: isEditItem ?? this.isEditItem,
     );
   }
 
   @override
-  List<Object?> get props => [listObjMoney, objMoney, isEdit];
+  List<Object?> get props => [listObjMoney, objMoney, isEdit, isEditItem];
 
   Map<String, dynamic> toJson() {
     return {

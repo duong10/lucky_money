@@ -1,11 +1,22 @@
 import 'package:equatable/equatable.dart';
+
 import 'transaction.dart';
 
 class ObjMoney extends Equatable {
+  final int? id;
   final String name;
   final List<Transaction> transactions;
 
-  ObjMoney({required this.name, required this.transactions});
+  ObjMoney({int? id, required this.name, required this.transactions})
+    : id = id ?? _generateId();
+
+  // Hàm sinh id unique (kết hợp thời gian + random)
+  static int _generateId() {
+    final now = DateTime.now().millisecondsSinceEpoch;
+    final random =
+        DateTime.now().microsecond * 1000 + DateTime.now().millisecond;
+    return now + random;
+  }
 
   @override
   List<Object?> get props => [name, transactions];
@@ -47,4 +58,3 @@ class ObjMoney extends Equatable {
     );
   }
 }
-

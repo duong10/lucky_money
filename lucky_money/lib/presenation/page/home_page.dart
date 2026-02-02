@@ -2,13 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucky_money/app/navigation/router_location.dart';
+import 'package:lucky_money/data/models/obj_money.dart';
 
 import '../bloc/money_bloc.dart';
 import '../widget/item_card.dart';
 import 'add_page.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  // Thêm biến để xử lý onPanUpdate
 
   @override
   Widget build(BuildContext context) {
@@ -46,7 +54,7 @@ class HomePage extends StatelessWidget {
                 child: ConstrainedBox(
                   constraints: BoxConstraints(minHeight: constraints.maxHeight),
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    padding: const EdgeInsets.only(left: 16),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -75,13 +83,58 @@ class HomePage extends StatelessWidget {
                             itemCount: state.listObjMoney.length,
                             itemBuilder: (context, index) {
                               final objMoney = state.listObjMoney[index];
-                              return ItemCard(
-                                objMoney: objMoney,
-                                onTap:
-                                    () => context.pushNamed(
-                                      AppRouterLocation.item.name,
-                                      extra: objMoney,
+
+                              return Dismissible(
+                                key: ValueKey(objMoney.id),
+                                direction: DismissDirection.endToStart,
+                                // Chỉ vuốt từ phải sang trái (hoặc startToEnd cho trái sang phải)
+                                background: Container(
+                                  color: Colors.red,
+                                  alignment: Alignment.centerRight,
+                                  padding: const EdgeInsets.only(right: 20),
+                                  child: const Icon(
+                                    Icons.delete,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                confirmDismiss: (direction) async {
+                                  return await _showDialog(context, objMoney) ??
+                                      false;
+                                },
+                                onDismissed: (direction) {
+                                  // Xóa item khỏi list
+                                  context.read<MoneyBloc>().add(
+                                    RemoveObjEvent(id: objMoney.id ?? 0),
+                                  );
+                                  // Hiển thị snackbar để undo
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text('Đã xóa ${objMoney.name}'),
                                     ),
+                                  );
+                                },
+                                child: ItemCard(
+                                  key: const ValueKey('swiped'),
+                                  objMoney: objMoney,
+                                  isEdit: state.isEdit,
+                                  onTap:
+                                      () => context.pushNamed(
+                                        AppRouterLocation.item.name,
+                                        extra: objMoney,
+                                      ),
+                                  onRemove: () async {
+                                    final bloc = context.read<MoneyBloc>();
+                                    final confirm = await _showDialog(
+                                      context,
+                                      objMoney,
+                                    );
+                                    if (confirm) {
+                                      return bloc.add(
+                                        RemoveObjEvent(id: objMoney.id ?? 0),
+                                      );
+                                    }
+                                  },
+                                ),
                               );
                             },
                           ),
@@ -120,6 +173,38 @@ class HomePage extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+
+  Future<dynamic> _showDialog(BuildContext context, ObjMoney objMoney) {
+    return showDialog(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: Center(child: const Text('Xác nhận xóa')),
+            content: Text(
+              'Bạn có chắc muốn xóa ${objMoney.name}?',
+              textAlign: TextAlign.center,
+            ),
+            actions: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context, false),
+                    child: const Text('Hủy'),
+                  ),
+                  TextButton(
+                    onPressed: () => Navigator.pop(context, true),
+                    child: const Text(
+                      'Xóa',
+                      style: TextStyle(color: Colors.red),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
     );
   }
 }

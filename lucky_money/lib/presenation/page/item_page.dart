@@ -20,7 +20,6 @@ class ItemPage extends StatelessWidget {
           (element) => element.name == objMoney.name,
           orElse: () => objMoney,
         );
-
         return Scaffold(
           backgroundColor: Colors.black,
           appBar: AppBar(
@@ -31,10 +30,15 @@ class ItemPage extends StatelessWidget {
                 child: Container(
                   padding: const EdgeInsets.only(right: 8),
                   child: InkWell(
-                    onTap: () {},
-                    child: const Text(
-                      'Edit',
-                      style: TextStyle(color: Colors.blue, fontSize: 22),
+                    highlightColor: Colors.transparent,
+                    splashColor: Colors.transparent,
+                    onTap:
+                        () => context.read<MoneyBloc>().add(
+                          IsEditEvent(isEditItem: !(state.isEditItem ?? false)),
+                        ),
+                    child: Text(
+                      (state.isEditItem ?? false) ? 'Done' : 'Edit',
+                      style: const TextStyle(color: Colors.blue, fontSize: 22),
                     ),
                   ),
                 ),
@@ -46,9 +50,7 @@ class ItemPage extends StatelessWidget {
               return SingleChildScrollView(
                 physics: const AlwaysScrollableScrollPhysics(),
                 child: ConstrainedBox(
-                  constraints: BoxConstraints(
-                    minHeight: constraints.maxHeight,
-                  ),
+                  constraints: BoxConstraints(minHeight: constraints.maxHeight),
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: Column(
@@ -56,7 +58,10 @@ class ItemPage extends StatelessWidget {
                       children: [
                         Text(
                           currentObjMoney.name,
-                          style: const TextStyle(color: Colors.white, fontSize: 30),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 30,
+                          ),
                         ),
                         const SizedBox(height: 12),
                         const Divider(
@@ -69,11 +74,18 @@ class ItemPage extends StatelessWidget {
                           physics: const NeverScrollableScrollPhysics(),
                           itemCount: currentObjMoney.transactions.length,
                           itemBuilder: (context, index) {
-                            final transaction = currentObjMoney.transactions[index];
-                            return ItemCardDetail(
-                              transaction: transaction,
-                              onTap: () => showBotton(context),
-                            );
+                            final transaction =
+                                currentObjMoney.transactions[index];
+                            return (state.isEditItem ?? false)
+                                ? ItemCardDetail(
+                                  transaction: transaction,
+                                  isEditItem: state.isEditItem,
+                                  onTap: () => _showBotton(context),
+                                )
+                                : ItemCardDetail(
+                                  transaction: transaction,
+                                  onTap: () => _showBotton(context),
+                                );
                           },
                         ),
                       ],
@@ -103,10 +115,9 @@ class ItemPage extends StatelessWidget {
         );
       },
     );
-
   }
 
-  Future<dynamic> showBotton(BuildContext context) {
+  Future<dynamic> _showBotton(BuildContext context) {
     final width = MediaQuery.sizeOf(context).width * 0.9;
 
     return showModalBottomSheet(
