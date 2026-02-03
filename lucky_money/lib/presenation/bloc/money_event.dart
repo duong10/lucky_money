@@ -29,6 +29,27 @@ class RemoveObjEvent extends MoneyEvent {
   List<Object> get props => [id];
 }
 
+class RemoveTransEvent extends MoneyEvent {
+  final int id;
+  final int idTrans;
+
+  const RemoveTransEvent(this.id, {required this.idTrans});
+
+  @override
+  List<Object> get props => [idTrans, id];
+}
+
+class EditTransEvent extends MoneyEvent {
+  final int id;
+  final String? newName;
+  final Transaction transaction;
+
+  const EditTransEvent(this.id, {this.newName, required this.transaction});
+
+  @override
+  List<Object> get props => [transaction, id, newName ?? ''];
+}
+
 class IsEditEvent extends MoneyEvent {
   final bool? isEdit;
   final bool? isEditItem;

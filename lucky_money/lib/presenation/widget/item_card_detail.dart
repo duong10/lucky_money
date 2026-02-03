@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:lucky_money/data/models/obj_money.dart';
 import 'package:lucky_money/data/models/transaction.dart';
+import 'package:lucky_money/presenation/page/add_page.dart';
 
 class ItemCardDetail extends StatelessWidget {
   const ItemCardDetail({
@@ -8,18 +10,23 @@ class ItemCardDetail extends StatelessWidget {
     required this.transaction,
     required this.onTap,
     this.isEditItem,
+    this.objMoney,
+    required this.onRemove,
   });
 
   final Transaction transaction;
   final VoidCallback onTap;
+  final VoidCallback onRemove;
   final bool? isEditItem;
+  final ObjMoney? objMoney;
 
   @override
   Widget build(BuildContext context) {
     final formatter = DateFormat('d MMM yyyy', 'en_US');
     final currencyFormatter = NumberFormat.currency(
-      locale: 'vi_VN',
-      symbol: 'đ',
+      locale: transaction.currency == 'USD' ? 'en_US' : 'vi_VN',
+      symbol: transaction.currency == 'USD' ? 'USD' : 'đ',
+      decimalDigits: transaction.currency == 'USD' ? 2 : 0,
     );
 
     final amountCustom = currencyFormatter.format(transaction.amount.abs());
@@ -29,7 +36,17 @@ class ItemCardDetail extends StatelessWidget {
     return Card(
       color: Colors.black,
       child: InkWell(
-        onTap: onTap,
+        onTap:
+            (isEditItem ?? false)
+                ? () {
+                  AddPage.show(
+                    context,
+                    objMoney: objMoney,
+                    transaction: transaction,
+                    pageName: 'Edit Transaction',
+                  );
+                }
+                : onTap,
         child: Column(
           children: [
             Padding(
@@ -44,7 +61,7 @@ class ItemCardDetail extends StatelessWidget {
                             child: Row(
                               children: [
                                 InkWell(
-                                  onTap: () {},
+                                  onTap: onRemove,
                                   child: Icon(
                                     size: 20,
                                     Icons.remove_circle_outlined,

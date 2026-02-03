@@ -9,19 +9,28 @@ import '../bloc/money_bloc.dart';
 import 'currency_page.dart';
 
 class AddPage extends StatefulWidget {
-  const AddPage({super.key, this.objMoney});
+  const AddPage({super.key, this.objMoney, this.transaction, this.pageName});
 
   final ObjMoney? objMoney;
+  final Transaction? transaction;
+  final String? pageName;
 
-  static Future<void> show(BuildContext context, {ObjMoney? objMoney}) async {
+  static Future<void> show(
+    BuildContext context, {
+    ObjMoney? objMoney,
+    Transaction? transaction,
+    String? pageName,
+  }) async {
     await showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder:
-          objMoney != null
-              ? (context) => AddPage(objMoney: objMoney)
-              : (context) => AddPage(),
+          (context) => AddPage(
+            objMoney: objMoney,
+            transaction: transaction,
+            pageName: pageName,
+          ),
     );
   }
 
@@ -37,12 +46,27 @@ class _AddPageState extends State<AddPage> {
   final DateFormat formatter = DateFormat('d MMM yyyy', 'en_US');
   DateTime selectedDate = DateTime.now();
   DateTime pickedDate = DateTime.now();
+  String selectedCurrencyCode = 'VND';
+  String selectedCurrencyFlag = '🇻🇳';
 
   @override
   void initState() {
     super.initState();
     if (widget.objMoney != null) {
       _nameController.text = widget.objMoney!.name;
+      if (widget.objMoney!.transactions.isNotEmpty) {
+        selectedCurrencyCode = widget.objMoney!.transactions.last.currency;
+        selectedCurrencyFlag = selectedCurrencyCode == 'USD' ? '🇺🇸' : '🇻🇳';
+      }
+    }
+
+    if (widget.transaction != null) {
+      isGive = widget.transaction!.isGive;
+      _amountController.text = widget.transaction!.amount.ceil().toString();
+      _commentController.text = widget.transaction!.comment;
+      selectedDate = widget.transaction!.date;
+      selectedCurrencyCode = widget.transaction!.currency;
+      selectedCurrencyFlag = selectedCurrencyCode == 'USD' ? '🇺🇸' : '🇻🇳';
     }
   }
 
@@ -66,8 +90,10 @@ class _AddPageState extends State<AddPage> {
             backgroundColor: const Color(0xFF1C1C1E),
             // elevation: 0,
             centerTitle: true,
-            title: const Text(
-              'Add Transaction',
+            title: Text(
+              (widget.pageName == null)
+                  ? 'Add Transaction'
+                  : widget.pageName ?? '',
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 17, // Standard iOS title size
@@ -93,14 +119,33 @@ class _AddPageState extends State<AddPage> {
                   if (name.isNotEmpty && amount > 0) {
                     final item = Transaction(
                       amount: amount,
+                      currency: selectedCurrencyCode,
                       date: selectedDate,
                       comment: comment,
                       isGive: isGive,
                     );
 
-                    context.read<MoneyBloc>().add(
-                      AddTransactionEvent(name: name, transactionItem: item),
-                    );
+                    if (widget.pageName != null && widget.transaction != null) {
+                      final updatedItem = widget.transaction!.copyWith(
+                        amount: amount,
+                        currency: selectedCurrencyCode,
+                        date: selectedDate,
+                        comment: comment,
+                        isGive: isGive,
+                      );
+                      context.read<MoneyBloc>().add(
+                        EditTransEvent(
+                          widget.objMoney?.id ?? 0,
+                          newName: name,
+                          transaction: updatedItem,
+                        ),
+                      );
+                    } else {
+                      context.read<MoneyBloc>().add(
+                        AddTransactionEvent(name: name, transactionItem: item),
+                      );
+                    }
+
                     Navigator.pop(context);
                   }
                 },
@@ -227,14 +272,29 @@ class _AddPageState extends State<AddPage> {
                     ),
                     Divider(thickness: 0.2, height: 0.2, color: Colors.grey),
                     GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          CupertinoPageRoute(
-                            builder: (context) => const CurrencyPage(),
-                          ),
-                        );
-                      },
+                      onTap:
+                          widget.pageName != null
+                              ? null
+                              : () async {
+                                final result =
+                                    await Navigator.push<Map<String, String>>(
+                                      context,
+                                      CupertinoPageRoute(
+                                        builder:
+                                            (context) => CurrencyPage(
+                                              selectedCurrencyCode:
+                                                  selectedCurrencyCode,
+                                            ),
+                                      ),
+                                    );
+
+                                if (result != null) {
+                                  setState(() {
+                                    selectedCurrencyCode = result['code']!;
+                                    selectedCurrencyFlag = result['flag']!;
+                                  });
+                                }
+                              },
                       behavior: HitTestBehavior.opaque,
                       child: Padding(
                         padding: const EdgeInsets.symmetric(vertical: 8),
@@ -242,26 +302,32 @@ class _AddPageState extends State<AddPage> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Row(
-                              children: const [
-                                Text('🇻🇳', style: TextStyle(fontSize: 24)),
-                                SizedBox(width: 8),
+                              children: [
                                 Text(
-                                  'VND',
+                                  selectedCurrencyFlag,
+                                  style: const TextStyle(fontSize: 24),
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  selectedCurrencyCode,
                                   style: TextStyle(
-                                    color: Colors.white,
+                                    color:
+                                        widget.pageName == null
+                                            ? Colors.white
+                                            : Colors.blue.withOpacity(0.5),
                                     fontSize: 17,
                                   ),
                                 ),
                               ],
                             ),
-                            Icon(
-                              Icons.arrow_forward_ios,
-                              color: Colors.white38,
-                              size: 12,
-                            ),
+                            if (widget.pageName == null)
+                              const Icon(
+                                Icons.arrow_forward_ios,
+                                color: Colors.white38,
+                                size: 12,
+                              ),
                           ],
                         ),
-                        // SizedBox(width: 16),
                       ),
                     ),
                   ],

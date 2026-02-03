@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
 import 'package:lucky_money/data/models/obj_money.dart';
+import 'package:lucky_money/data/models/transaction.dart';
 import 'package:lucky_money/presenation/bloc/money_bloc.dart';
 import 'package:lucky_money/presenation/widget/item_card_detail.dart';
 
@@ -15,9 +17,9 @@ class ItemPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<MoneyBloc, MoneyState>(
       builder: (context, state) {
-        // Tìm đối tượng ObjMoney mới nhất trong state dựa vào name
+        // Tìm đối tượng ObjMoney mới nhất trong state dựa vào id
         final currentObjMoney = state.listObjMoney.firstWhere(
-          (element) => element.name == objMoney.name,
+          (element) => element.id == objMoney.id,
           orElse: () => objMoney,
         );
         return Scaffold(
@@ -76,16 +78,63 @@ class ItemPage extends StatelessWidget {
                           itemBuilder: (context, index) {
                             final transaction =
                                 currentObjMoney.transactions[index];
-                            return (state.isEditItem ?? false)
-                                ? ItemCardDetail(
-                                  transaction: transaction,
-                                  isEditItem: state.isEditItem,
-                                  onTap: () => _showBotton(context),
-                                )
-                                : ItemCardDetail(
-                                  transaction: transaction,
-                                  onTap: () => _showBotton(context),
+                            return Dismissible(
+                              key: ValueKey(transaction.idTransaction),
+                              direction: DismissDirection.endToStart,
+                              // Chỉ vuốt từ phải sang trái (hoặc startToEnd cho trái sang phải)
+                              background: Container(
+                                color: Colors.red,
+                                alignment: Alignment.centerRight,
+                                padding: const EdgeInsets.only(right: 20),
+                                child: const Icon(
+                                  Icons.delete,
+                                  color: Colors.white,
+                                ),
+                              ),
+                              confirmDismiss: (direction) async {
+                                return await _show(context, transaction) ??
+                                    false;
+                              },
+                              onDismissed: (direction) {
+                                //Xóa item khỏi list
+                                context.read<MoneyBloc>().add(
+                                  RemoveTransEvent(
+                                    currentObjMoney.id ?? 0,
+                                    idTrans: transaction.idTransaction ?? 0,
+                                  ),
                                 );
+                                // Hiển thị snackbar để undo
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text('Đã xóa thành công')),
+                                );
+                              },
+                              child: ItemCardDetail(
+                                onRemove: () async {
+                                  final bloc = context.read<MoneyBloc>();
+                                  final confrm = await _show(
+                                    context,
+                                    transaction,
+                                  );
+                                  if (confrm) {
+                                    bloc.add(
+                                      RemoveTransEvent(
+                                        currentObjMoney.id ?? 0,
+                                        idTrans: transaction.idTransaction ?? 0,
+                                      ),
+                                    );
+                                  }
+                                },
+                                objMoney: currentObjMoney,
+                                transaction: transaction,
+                                isEditItem: state.isEditItem,
+                                onTap:
+                                    () => _showBotton(
+                                      context,
+                                      transaction,
+                                      currentObjMoney,
+                                    ),
+                              ),
+                            );
                           },
                         ),
                       ],
@@ -102,7 +151,61 @@ class ItemPage extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Icon(Icons.settings_rounded),
+                // const Icon(Icons.settings_rounded),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    if (currentObjMoney.totalVND != 0)
+                      Builder(
+                        builder: (context) {
+                          final value = currentObjMoney.totalVND;
+                          final formatter = NumberFormat.currency(
+                            locale: 'vi_VN',
+                            symbol: 'đ',
+                            decimalDigits: 0,
+                          );
+                          final color = value > 0 ? Colors.green : Colors.red;
+                          final prefix = value > 0 ? '+' : '';
+                          return Text(
+                            '$prefix${formatter.format(value)}',
+                            style: TextStyle(
+                              color: color,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                          );
+                        },
+                      ),
+                    if (currentObjMoney.totalUSD != 0)
+                      Builder(
+                        builder: (context) {
+                          final value = currentObjMoney.totalUSD;
+                          final formatter = NumberFormat.currency(
+                            locale: 'en_US',
+                            symbol: 'USD ',
+                            decimalDigits: 2,
+                          );
+                          final color = value > 0 ? Colors.green : Colors.red;
+                          final prefix = value > 0 ? '+' : '';
+                          return Text(
+                            '$prefix${formatter.format(value)}',
+                            style: TextStyle(
+                              color: color,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                          );
+                        },
+                      ),
+                    if (currentObjMoney.totalVND == 0 &&
+                        currentObjMoney.totalUSD == 0)
+                      const Text(
+                        '0đ',
+                        style: TextStyle(color: Colors.grey, fontSize: 16),
+                      ),
+                  ],
+                ),
                 InkWell(
                   child: const Icon(Icons.add),
                   onTap: () {
@@ -117,7 +220,11 @@ class ItemPage extends StatelessWidget {
     );
   }
 
-  Future<dynamic> _showBotton(BuildContext context) {
+  Future<dynamic> _showBotton(
+    BuildContext context,
+    Transaction transaction,
+    ObjMoney objMoney,
+  ) {
     final width = MediaQuery.sizeOf(context).width * 0.9;
 
     return showModalBottomSheet(
@@ -125,7 +232,7 @@ class ItemPage extends StatelessWidget {
       backgroundColor: Colors.transparent,
       context: context,
       isScrollControlled: true,
-      shape: RoundedRectangleBorder(
+      shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.all(Radius.circular(24)),
       ),
       builder: (context) {
@@ -136,60 +243,89 @@ class ItemPage extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                Container(
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade800,
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(8),
-                      topRight: Radius.circular(8),
+                InkWell(
+                  onTap: () {
+                    final payTransaction = Transaction(
+                      amount: transaction.amount,
+                      date: DateTime.now(),
+                      comment: transaction.comment,
+                      isGive: !transaction.isGive,
+                      currency: transaction.currency,
+                    );
+                    context.read<MoneyBloc>().add(
+                      AddTransactionEvent(
+                        name: objMoney.name,
+                        transactionItem: payTransaction,
+                      ),
+                    );
+                    Navigator.pop(context);
+                  },
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade800,
+                      borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(8),
+                        topRight: Radius.circular(8),
+                      ),
                     ),
-                  ),
-                  padding: EdgeInsets.only(top: 12, bottom: 12),
-                  width: width,
-                  child: Center(
-                    child: Text(
-                      'Pay this',
-                      style: TextStyle(
-                        color: Colors.blue,
-                        fontSize: 15,
-                        fontWeight: FontWeight.w500,
+                    padding: const EdgeInsets.only(top: 12, bottom: 12),
+                    width: width,
+                    child: const Center(
+                      child: Text(
+                        'Pay this',
+                        style: TextStyle(
+                          color: Colors.blue,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                     ),
                   ),
                 ),
-                Divider(thickness: 0.2, height: 0.2, color: Colors.grey),
-                Container(
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade800,
-                    borderRadius: BorderRadius.only(
-                      bottomLeft: Radius.circular(8),
-                      bottomRight: Radius.circular(8),
+                const Divider(thickness: 0.2, height: 0.2, color: Colors.grey),
+                InkWell(
+                  onTap: () {
+                    Navigator.pop(context);
+                    AddPage.show(
+                      context,
+                      objMoney: objMoney,
+                      transaction: transaction,
+                      pageName: 'Edit Transaction',
+                    );
+                  },
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade800,
+                      borderRadius: const BorderRadius.only(
+                        bottomLeft: Radius.circular(8),
+                        bottomRight: Radius.circular(8),
+                      ),
                     ),
-                  ),
-                  padding: EdgeInsets.only(top: 12, bottom: 12),
-                  width: width,
-                  child: Center(
-                    child: Text(
-                      'Edit this',
-                      style: TextStyle(
-                        color: Colors.blue,
-                        fontSize: 15,
-                        fontWeight: FontWeight.w500,
+                    padding: const EdgeInsets.only(top: 12, bottom: 12),
+                    width: width,
+                    child: const Center(
+                      child: Text(
+                        'Edit this',
+                        style: TextStyle(
+                          color: Colors.blue,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                     ),
                   ),
                 ),
-                SizedBox(height: 8),
+                const SizedBox(height: 8),
                 InkWell(
                   onTap: () => Navigator.pop(context),
                   child: Container(
                     decoration: BoxDecoration(
                       color: Colors.grey.shade800,
-                      borderRadius: BorderRadius.all(Radius.circular(8)),
+                      borderRadius: const BorderRadius.all(Radius.circular(8)),
                     ),
-                    padding: EdgeInsets.only(top: 12, bottom: 12),
+                    padding: const EdgeInsets.only(top: 12, bottom: 12),
                     width: width,
-                    child: Center(
+                    child: const Center(
                       child: Text(
                         'Cancel',
                         style: TextStyle(
@@ -208,4 +344,30 @@ class ItemPage extends StatelessWidget {
       },
     );
   }
+}
+
+Future<dynamic> _show(BuildContext context, Transaction trans) {
+  return showDialog(
+    context: context,
+    builder:
+        (context) => AlertDialog(
+          title: Center(child: const Text('Xác nhận xóa')),
+          content: Text('Bạn có chắc muốn xóa }?', textAlign: TextAlign.center),
+          actions: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context, false),
+                  child: const Text('Hủy'),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.pop(context, true),
+                  child: const Text('Xóa', style: TextStyle(color: Colors.red)),
+                ),
+              ],
+            ),
+          ],
+        ),
+  );
 }

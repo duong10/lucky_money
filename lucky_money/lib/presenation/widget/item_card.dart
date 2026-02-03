@@ -19,27 +19,37 @@ class ItemCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final currencyFormatter = NumberFormat.currency(
-      locale: 'vi_VN',
-      symbol: 'đ',
-    );
+    Widget buildTotalText(double totalValue, String currency) {
+      if (totalValue == 0) return const SizedBox.shrink();
 
-    final totalAmount = currencyFormatter.format(objMoney.totalAmount.abs());
-    final color = switch (objMoney.totalAmount) {
-      > 0 => Colors.green,
-      < 0 => Colors.red,
-      _ => Colors.grey,
-    };
-    final prefix = switch (objMoney.totalAmount) {
-      > 0 => '+',
-      < 0 => '-',
-      _ => '',
-    };
+      final formatter = NumberFormat.currency(
+        locale: currency == 'USD' ? 'en_US' : 'vi_VN',
+        symbol: currency == 'USD' ? 'USD' : 'đ',
+        decimalDigits: currency == 'USD' ? 2 : 0,
+      );
+
+      final color = totalValue > 0 ? Colors.green : Colors.red;
+      final prefix = totalValue > 0 ? '+' : '-';
+      final formattedAmount = formatter.format(totalValue.abs());
+
+      return Text(
+        '$prefix$formattedAmount',
+        style: TextStyle(color: color, fontSize: 18),
+      );
+    }
 
     return Card(
       color: Colors.black,
       child: InkWell(
-        onTap: onTap,
+        highlightColor:
+            (isEdit ?? false)
+                ? Colors.transparent
+                : Theme.of(context).highlightColor,
+        splashColor:
+            (isEdit ?? false)
+                ? Colors.transparent
+                : Theme.of(context).splashColor,
+        onTap: (isEdit ?? false) ? () {} : onTap,
         child: Column(
           children: [
             Padding(
@@ -55,10 +65,10 @@ class ItemCard extends StatelessWidget {
                               mainAxisAlignment: MainAxisAlignment.start,
                               children: [
                                 Padding(
-                                  padding: EdgeInsets.only(bottom: 2),
+                                  padding: const EdgeInsets.only(bottom: 2),
                                   child: InkWell(
                                     onTap: onRemove,
-                                    child: Icon(
+                                    child: const Icon(
                                       size: 20,
                                       Icons.remove_circle_outlined,
                                       color: Colors.red,
@@ -68,7 +78,7 @@ class ItemCard extends StatelessWidget {
                                 const SizedBox(width: 12),
                                 Text(
                                   objMoney.name,
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                     color: Colors.white,
                                     fontSize: 22,
                                   ),
@@ -76,11 +86,12 @@ class ItemCard extends StatelessWidget {
                               ],
                             ),
                           ),
-                          Flexible(
-                            child: Text(
-                              '$prefix$totalAmount',
-                              style: TextStyle(color: color, fontSize: 18),
-                            ),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              buildTotalText(objMoney.totalVND, 'VND'),
+                              buildTotalText(objMoney.totalUSD, 'USD'),
+                            ],
                           ),
                         ],
                       )
@@ -90,7 +101,7 @@ class ItemCard extends StatelessWidget {
                           Expanded(
                             child: Text(
                               objMoney.name,
-                              style: TextStyle(
+                              style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 22,
                               ),
@@ -100,17 +111,15 @@ class ItemCard extends StatelessWidget {
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.end,
                               children: [
-                                Flexible(
-                                  child: Text(
-                                    '$prefix$totalAmount',
-                                    style: TextStyle(
-                                      color: color,
-                                      fontSize: 18,
-                                    ),
-                                  ),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  children: [
+                                    buildTotalText(objMoney.totalVND, 'VND'),
+                                    buildTotalText(objMoney.totalUSD, 'USD'),
+                                  ],
                                 ),
                                 const SizedBox(width: 8),
-                                Icon(
+                                const Icon(
                                   Icons.arrow_forward_ios,
                                   color: Colors.white38,
                                   size: 12,

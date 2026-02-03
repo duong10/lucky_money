@@ -11,6 +11,8 @@ class MoneyBloc extends HydratedBloc<MoneyEvent, MoneyState> {
   MoneyBloc() : super(const MoneyState()) {
     on<AddTransactionEvent>(_onAddTransaction);
     on<RemoveObjEvent>(_onRemoveObjEvent);
+    on<RemoveTransEvent>(_onRemoveTransEvent);
+    on<EditTransEvent>(_onEditTransEvent);
     on<AddObjMoneyEvent>(_onAddObjMoneyEvent);
     on<IsEditEvent>(_onIsEditEvent);
   }
@@ -44,10 +46,54 @@ class MoneyBloc extends HydratedBloc<MoneyEvent, MoneyState> {
       (e) => e.id == event.id,
     );
 
-    final removeObj = state.listObjMoney[existingIndex];
-    final newList = List<ObjMoney>.from(state.listObjMoney)..remove(removeObj);
+    if (existingIndex != -1) {
+      final newList = List<ObjMoney>.from(state.listObjMoney)
+        ..removeAt(existingIndex);
+      emit(state.copyWith(listObjMoney: newList));
+    }
+  }
 
-    emit(state.copyWith(listObjMoney: newList));
+  void _onRemoveTransEvent(RemoveTransEvent event, Emitter<MoneyState> emit) {
+    final existingIndex = state.listObjMoney.indexWhere(
+      (e) => e.id == event.id,
+    );
+
+    if (existingIndex != -1) {
+      final existingObj = state.listObjMoney[existingIndex];
+      final newTransactions = List<Transaction>.from(existingObj.transactions)
+        ..removeWhere((tran) => tran.idTransaction == event.idTrans);
+      final newObj = existingObj.copyWith(transactions: newTransactions);
+
+      final newList = List<ObjMoney>.from(state.listObjMoney);
+      newList[existingIndex] = newObj;
+      emit(state.copyWith(listObjMoney: newList));
+    }
+  }
+
+  void _onEditTransEvent(EditTransEvent event, Emitter<MoneyState> emit) {
+    final existingIndex = state.listObjMoney.indexWhere(
+      (e) => e.id == event.id,
+    );
+
+    if (existingIndex != -1) {
+      final existingObj = state.listObjMoney[existingIndex];
+      final transactionIndex = existingObj.transactions.indexWhere(
+        (tran) => tran.idTransaction == event.transaction.idTransaction,
+      );
+
+      if (transactionIndex != -1) {
+        final newTransactions = List<Transaction>.from(existingObj.transactions);
+        newTransactions[transactionIndex] = event.transaction;
+        final newObj = existingObj.copyWith(
+          name: event.newName ?? existingObj.name,
+          transactions: newTransactions,
+        );
+
+        final newList = List<ObjMoney>.from(state.listObjMoney);
+        newList[existingIndex] = newObj;
+        emit(state.copyWith(listObjMoney: newList));
+      }
+    }
   }
 
   void _onAddObjMoneyEvent(AddObjMoneyEvent event, Emitter<MoneyState> emit) {

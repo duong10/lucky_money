@@ -19,22 +19,43 @@ class ObjMoney extends Equatable {
   }
 
   @override
-  List<Object?> get props => [name, transactions];
+  List<Object?> get props => [id, name, transactions];
 
-  double get totalAmount {
+  double get totalVND {
     double total = 0;
     for (var item in transactions) {
-      if (item.isGive) {
-        total += item.amount;
-      } else {
-        total -= item.amount;
+      if (item.currency == 'VND') {
+        if (item.isGive) {
+          total += item.amount;
+        } else {
+          total -= item.amount;
+        }
       }
     }
     return total;
   }
 
-  ObjMoney copyWith({String? name, List<Transaction>? transactions}) {
+  double get totalUSD {
+    double total = 0;
+    for (var item in transactions) {
+      if (item.currency == 'USD') {
+        if (item.isGive) {
+          total += item.amount;
+        } else {
+          total -= item.amount;
+        }
+      }
+    }
+    return total;
+  }
+
+  ObjMoney copyWith({
+    int? id,
+    String? name,
+    List<Transaction>? transactions,
+  }) {
     return ObjMoney(
+      id: id ?? this.id,
       name: name ?? this.name,
       transactions: transactions ?? this.transactions,
     );
@@ -42,6 +63,7 @@ class ObjMoney extends Equatable {
 
   Map<String, dynamic> toJson() {
     return {
+      'id': id,
       'name': name,
       'transactions': transactions.map((e) => e.toJson()).toList(),
     };
@@ -49,6 +71,7 @@ class ObjMoney extends Equatable {
 
   factory ObjMoney.fromJson(Map<String, dynamic> json) {
     return ObjMoney(
+      id: json['id'] as int?,
       name: json['name'] as String? ?? '',
       transactions:
           (json['transactions'] as List<dynamic>?)

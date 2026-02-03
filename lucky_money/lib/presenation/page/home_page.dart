@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import 'package:lucky_money/app/navigation/router_location.dart';
 import 'package:lucky_money/data/models/obj_money.dart';
 
@@ -60,7 +61,11 @@ class _HomePageState extends State<HomePage> {
                       children: [
                         const Text(
                           'LuckyMoney',
-                          style: TextStyle(color: Colors.white, fontSize: 30),
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 30,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                         const SizedBox(height: 12),
                         const Divider(
@@ -98,7 +103,7 @@ class _HomePageState extends State<HomePage> {
                                   ),
                                 ),
                                 confirmDismiss: (direction) async {
-                                  return await _showDialog(context, objMoney) ??
+                                  return await _show(context, objMoney) ??
                                       false;
                                 },
                                 onDismissed: (direction) {
@@ -124,7 +129,7 @@ class _HomePageState extends State<HomePage> {
                                       ),
                                   onRemove: () async {
                                     final bloc = context.read<MoneyBloc>();
-                                    final confirm = await _showDialog(
+                                    final confirm = await _show(
                                       context,
                                       objMoney,
                                     );
@@ -146,15 +151,78 @@ class _HomePageState extends State<HomePage> {
             },
           ),
           bottomNavigationBar: Container(
-            padding: EdgeInsets.symmetric(horizontal: 32, vertical: 0),
+            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 0),
             height: MediaQuery.sizeOf(context).height * 0.08,
             color: Colors.grey.shade900,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Icon(Icons.share),
+                // Icon(Icons.share, color: Colors.grey.shade900),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Builder(
+                      builder: (context) {
+                        final totalVND = state.listObjMoney.fold<double>(
+                          0,
+                          (sum, item) => sum + item.totalVND,
+                        );
+                        if (totalVND == 0) return const SizedBox.shrink();
+
+                        final formatter = NumberFormat.currency(
+                          locale: 'vi_VN',
+                          symbol: 'đ',
+                          decimalDigits: 0,
+                        );
+                        final color = totalVND > 0 ? Colors.green : Colors.red;
+                        final prefix = totalVND > 0 ? '+' : '';
+                        return Text(
+                          '$prefix${formatter.format(totalVND)}',
+                          style: TextStyle(
+                            color: color,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        );
+                      },
+                    ),
+                    Builder(
+                      builder: (context) {
+                        final totalUSD = state.listObjMoney.fold<double>(
+                          0,
+                          (sum, item) => sum + item.totalUSD,
+                        );
+                        if (totalUSD == 0) return const SizedBox.shrink();
+
+                        final formatter = NumberFormat.currency(
+                          locale: 'en_US',
+                          symbol: 'USD ',
+                          decimalDigits: 2,
+                        );
+                        final color = totalUSD > 0 ? Colors.green : Colors.red;
+                        final prefix = totalUSD > 0 ? '+' : '';
+                        return Text(
+                          '$prefix${formatter.format(totalUSD)}',
+                          style: TextStyle(
+                            color: color,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        );
+                      },
+                    ),
+                    if (state.listObjMoney.every(
+                      (item) => item.totalVND == 0 && item.totalUSD == 0,
+                    ))
+                      const Text(
+                        '0đ',
+                        style: TextStyle(color: Colors.grey, fontSize: 16),
+                      ),
+                  ],
+                ),
                 InkWell(
-                  child: Icon(Icons.add),
+                  child: const Icon(Icons.add),
                   onTap: () {
                     AddPage.show(context);
                     // context.pushNamed(AppRouterLocation.add.name);
@@ -175,36 +243,33 @@ class _HomePageState extends State<HomePage> {
       },
     );
   }
+}
 
-  Future<dynamic> _showDialog(BuildContext context, ObjMoney objMoney) {
-    return showDialog(
-      context: context,
-      builder:
-          (context) => AlertDialog(
-            title: Center(child: const Text('Xác nhận xóa')),
-            content: Text(
-              'Bạn có chắc muốn xóa ${objMoney.name}?',
-              textAlign: TextAlign.center,
-            ),
-            actions: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(context, false),
-                    child: const Text('Hủy'),
-                  ),
-                  TextButton(
-                    onPressed: () => Navigator.pop(context, true),
-                    child: const Text(
-                      'Xóa',
-                      style: TextStyle(color: Colors.red),
-                    ),
-                  ),
-                ],
-              ),
-            ],
+Future<dynamic> _show(BuildContext context, ObjMoney objMoney) {
+  return showDialog(
+    context: context,
+    builder:
+        (context) => AlertDialog(
+          title: Center(child: const Text('Xác nhận xóa')),
+          content: Text(
+            'Bạn có chắc muốn xóa ${objMoney.name}?',
+            textAlign: TextAlign.center,
           ),
-    );
-  }
+          actions: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context, false),
+                  child: const Text('Hủy'),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.pop(context, true),
+                  child: const Text('Xóa', style: TextStyle(color: Colors.red)),
+                ),
+              ],
+            ),
+          ],
+        ),
+  );
 }
