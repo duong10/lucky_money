@@ -250,9 +250,9 @@ Future<dynamic> _show(BuildContext context, ObjMoney objMoney) {
     context: context,
     builder:
         (context) => AlertDialog(
-          title: Center(child: const Text('Xác nhận xóa')),
+          title: Center(child: const Text('Confirm deletion')),
           content: Text(
-            'Bạn có chắc muốn xóa ${objMoney.name}?',
+            'Are you sure you want to delete ${objMoney.name}?',
             textAlign: TextAlign.center,
           ),
           actions: [
@@ -261,11 +261,14 @@ Future<dynamic> _show(BuildContext context, ObjMoney objMoney) {
               children: [
                 TextButton(
                   onPressed: () => Navigator.pop(context, false),
-                  child: const Text('Hủy'),
+                  child: const Text('Cancel'),
                 ),
                 TextButton(
                   onPressed: () => Navigator.pop(context, true),
-                  child: const Text('Xóa', style: TextStyle(color: Colors.red)),
+                  child: const Text(
+                    'Delete',
+                    style: TextStyle(color: Colors.red),
+                  ),
                 ),
               ],
             ),

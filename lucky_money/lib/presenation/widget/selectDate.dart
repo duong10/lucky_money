@@ -19,7 +19,6 @@ class _SelectDateTextState extends State<SelectDateText> {
           initialDate: _selectedDate, // ngày mặc định
           firstDate: DateTime(2000),
           lastDate: DateTime(2100),
-
         );
 
         if (pickedDate != null) {
@@ -29,7 +28,7 @@ class _SelectDateTextState extends State<SelectDateText> {
         }
       },
       child: Text(
-        'Ngày: ${_selectedDate.day}/${_selectedDate.month}/${_selectedDate.year}',
+        'Date: ${_selectedDate.day}/${_selectedDate.month}/${_selectedDate.year}',
         style: const TextStyle(
           fontSize: 16,
           decoration: TextDecoration.underline,

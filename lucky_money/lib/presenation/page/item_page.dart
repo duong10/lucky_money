@@ -351,19 +351,25 @@ Future<dynamic> _show(BuildContext context, Transaction trans) {
     context: context,
     builder:
         (context) => AlertDialog(
-          title: Center(child: const Text('Xác nhận xóa')),
-          content: Text('Bạn có chắc muốn xóa }?', textAlign: TextAlign.center),
+          title: Center(child: const Text('Confirm deletion')),
+          content: Text(
+            'Are you sure you want to delete?',
+            textAlign: TextAlign.center,
+          ),
           actions: [
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 TextButton(
                   onPressed: () => Navigator.pop(context, false),
-                  child: const Text('Hủy'),
+                  child: const Text('Cancel'),
                 ),
                 TextButton(
                   onPressed: () => Navigator.pop(context, true),
-                  child: const Text('Xóa', style: TextStyle(color: Colors.red)),
+                  child: const Text(
+                    'Delete',
+                    style: TextStyle(color: Colors.red),
+                  ),
                 ),
               ],
             ),
