@@ -158,68 +158,76 @@ class _HomePageState extends State<HomePage> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 // Icon(Icons.share, color: Colors.grey.shade900),
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Builder(
-                      builder: (context) {
-                        final totalVND = state.listObjMoney.fold<double>(
-                          0,
-                          (sum, item) => sum + item.totalVND,
-                        );
-                        if (totalVND == 0) return const SizedBox.shrink();
+                Flexible(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Builder(
+                        builder: (context) {
+                          final totalVND = state.listObjMoney.fold<double>(
+                            0,
+                            (sum, item) => sum + item.totalVND,
+                          );
+                          if (totalVND == 0) return const SizedBox.shrink();
 
-                        final formatter = NumberFormat.currency(
-                          locale: 'vi_VN',
-                          symbol: 'đ',
-                          decimalDigits: 0,
-                        );
-                        final color = totalVND > 0 ? Colors.green : Colors.red;
-                        final prefix = totalVND > 0 ? '+' : '';
-                        return Text(
-                          '$prefix${formatter.format(totalVND)}',
-                          style: TextStyle(
-                            color: color,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                          ),
-                        );
-                      },
-                    ),
-                    Builder(
-                      builder: (context) {
-                        final totalUSD = state.listObjMoney.fold<double>(
-                          0,
-                          (sum, item) => sum + item.totalUSD,
-                        );
-                        if (totalUSD == 0) return const SizedBox.shrink();
-
-                        final formatter = NumberFormat.currency(
-                          locale: 'en_US',
-                          symbol: 'USD ',
-                          decimalDigits: 2,
-                        );
-                        final color = totalUSD > 0 ? Colors.green : Colors.red;
-                        final prefix = totalUSD > 0 ? '+' : '';
-                        return Text(
-                          '$prefix${formatter.format(totalUSD)}',
-                          style: TextStyle(
-                            color: color,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                          ),
-                        );
-                      },
-                    ),
-                    if (state.listObjMoney.every(
-                      (item) => item.totalVND == 0 && item.totalUSD == 0,
-                    ))
-                      const Text(
-                        '0đ',
-                        style: TextStyle(color: Colors.grey, fontSize: 16),
+                          final formatter = NumberFormat.currency(
+                            locale: 'vi_VN',
+                            symbol: 'đ',
+                            decimalDigits: 0,
+                          );
+                          final color =
+                              totalVND > 0 ? Colors.green : Colors.red;
+                          final prefix = totalVND > 0 ? '+' : '';
+                          return Flexible(
+                            child: Text(
+                              '$prefix ${formatter.format(totalVND)}',
+                              style: TextStyle(
+                                color: color,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
+                            ),
+                          );
+                        },
                       ),
-                  ],
+                      Builder(
+                        builder: (context) {
+                          final totalUSD = state.listObjMoney.fold<double>(
+                            0,
+                            (sum, item) => sum + item.totalUSD,
+                          );
+                          if (totalUSD == 0) return const SizedBox.shrink();
+
+                          final formatter = NumberFormat.currency(
+                            locale: 'en_US',
+                            symbol: 'USD ',
+                            decimalDigits: 2,
+                          );
+                          final color =
+                              totalUSD > 0 ? Colors.green : Colors.red;
+                          final prefix = totalUSD > 0 ? '+' : '';
+                          return Flexible(
+                            child: Text(
+                              '$prefix${formatter.format(totalUSD)}',
+                              style: TextStyle(
+                                color: color,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                      if (state.listObjMoney.every(
+                        (item) => item.totalVND == 0 && item.totalUSD == 0,
+                      ))
+                        const Text(
+                          '0đ',
+                          style: TextStyle(color: Colors.grey, fontSize: 16),
+                        ),
+                    ],
+                  ),
                 ),
                 InkWell(
                   child: const Icon(Icons.add),

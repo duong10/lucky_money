@@ -24,7 +24,7 @@ class ItemCard extends StatelessWidget {
 
       final formatter = NumberFormat.currency(
         locale: currency == 'USD' ? 'en_US' : 'vi_VN',
-        symbol: currency == 'USD' ? 'USD' : 'đ',
+        symbol: currency == 'USD' ? 'USD ' : 'đ',
         decimalDigits: currency == 'USD' ? 2 : 0,
       );
 
@@ -98,7 +98,8 @@ class ItemCard extends StatelessWidget {
                       : Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Expanded(
+                          Flexible(
+                            flex: 1,
                             child: Text(
                               objMoney.name,
                               style: const TextStyle(
@@ -107,16 +108,19 @@ class ItemCard extends StatelessWidget {
                               ),
                             ),
                           ),
-                          Expanded(
+                          Flexible(
+                            flex: 2,
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.end,
                               children: [
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.end,
-                                  children: [
-                                    buildTotalText(objMoney.totalVND, 'VND'),
-                                    buildTotalText(objMoney.totalUSD, 'USD'),
-                                  ],
+                                Flexible(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.end,
+                                    children: [
+                                      buildTotalText(objMoney.totalVND, 'VND'),
+                                      buildTotalText(objMoney.totalUSD, 'USD'),
+                                    ],
+                                  ),
                                 ),
                                 const SizedBox(width: 8),
                                 const Icon(

@@ -152,59 +152,61 @@ class ItemPage extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 // const Icon(Icons.settings_rounded),
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    if (currentObjMoney.totalVND != 0)
-                      Builder(
-                        builder: (context) {
-                          final value = currentObjMoney.totalVND;
-                          final formatter = NumberFormat.currency(
-                            locale: 'vi_VN',
-                            symbol: 'đ',
-                            decimalDigits: 0,
-                          );
-                          final color = value > 0 ? Colors.green : Colors.red;
-                          final prefix = value > 0 ? '+' : '';
-                          return Text(
-                            '$prefix${formatter.format(value)}',
-                            style: TextStyle(
-                              color: color,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                            ),
-                          );
-                        },
-                      ),
-                    if (currentObjMoney.totalUSD != 0)
-                      Builder(
-                        builder: (context) {
-                          final value = currentObjMoney.totalUSD;
-                          final formatter = NumberFormat.currency(
-                            locale: 'en_US',
-                            symbol: 'USD ',
-                            decimalDigits: 2,
-                          );
-                          final color = value > 0 ? Colors.green : Colors.red;
-                          final prefix = value > 0 ? '+' : '';
-                          return Text(
-                            '$prefix${formatter.format(value)}',
-                            style: TextStyle(
-                              color: color,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                            ),
-                          );
-                        },
-                      ),
-                    if (currentObjMoney.totalVND == 0 &&
-                        currentObjMoney.totalUSD == 0)
-                      const Text(
-                        '0đ',
-                        style: TextStyle(color: Colors.grey, fontSize: 16),
-                      ),
-                  ],
+                Flexible(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      if (currentObjMoney.totalVND != 0)
+                        Builder(
+                          builder: (context) {
+                            final value = currentObjMoney.totalVND;
+                            final formatter = NumberFormat.currency(
+                              locale: 'vi_VN',
+                              symbol: 'đ',
+                              decimalDigits: 0,
+                            );
+                            final color = value > 0 ? Colors.green : Colors.red;
+                            final prefix = value > 0 ? '+' : '';
+                            return Text(
+                              '$prefix${formatter.format(value)}',
+                              style: TextStyle(
+                                color: color,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
+                            );
+                          },
+                        ),
+                      if (currentObjMoney.totalUSD != 0)
+                        Builder(
+                          builder: (context) {
+                            final value = currentObjMoney.totalUSD;
+                            final formatter = NumberFormat.currency(
+                              locale: 'en_US',
+                              symbol: 'USD ',
+                              decimalDigits: 2,
+                            );
+                            final color = value > 0 ? Colors.green : Colors.red;
+                            final prefix = value > 0 ? '+' : '';
+                            return Text(
+                              '$prefix${formatter.format(value)}',
+                              style: TextStyle(
+                                color: color,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
+                            );
+                          },
+                        ),
+                      if (currentObjMoney.totalVND == 0 &&
+                          currentObjMoney.totalUSD == 0)
+                        const Text(
+                          '0đ',
+                          style: TextStyle(color: Colors.grey, fontSize: 16),
+                        ),
+                    ],
+                  ),
                 ),
                 InkWell(
                   child: const Icon(Icons.add),

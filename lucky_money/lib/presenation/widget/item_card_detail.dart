@@ -25,7 +25,7 @@ class ItemCardDetail extends StatelessWidget {
     final formatter = DateFormat('d MMM yyyy', 'en_US');
     final currencyFormatter = NumberFormat.currency(
       locale: transaction.currency == 'USD' ? 'en_US' : 'vi_VN',
-      symbol: transaction.currency == 'USD' ? 'USD' : 'đ',
+      symbol: transaction.currency == 'USD' ? 'USD ' : 'đ',
       decimalDigits: transaction.currency == 'USD' ? 2 : 0,
     );
 
@@ -103,7 +103,7 @@ class ItemCardDetail extends StatelessWidget {
                                   formatter.format(transaction.date),
                                   style: TextStyle(
                                     color: Colors.grey,
-                                    fontSize: 18,
+                                    fontSize: 16,
                                   ),
                                 ),
                                 const SizedBox(width: 8),

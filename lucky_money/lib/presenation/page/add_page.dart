@@ -1,9 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:lucky_money/data/models/obj_money.dart';
 import 'package:lucky_money/data/models/transaction.dart';
+import 'package:lucky_money/share/usd_separator_formatter.dart';
 
 import '../bloc/money_bloc.dart';
 import 'currency_page.dart';
@@ -49,6 +51,8 @@ class _AddPageState extends State<AddPage> {
   String selectedCurrencyCode = 'VND';
   String selectedCurrencyFlag = '🇻🇳';
 
+  final _formKey = GlobalKey<FormState>();
+
   @override
   void initState() {
     super.initState();
@@ -62,7 +66,7 @@ class _AddPageState extends State<AddPage> {
 
     if (widget.transaction != null) {
       isGive = widget.transaction!.isGive;
-      _amountController.text = widget.transaction!.amount.ceil().toString();
+      _amountController.text = widget.transaction!.amount.toString().replaceAll(RegExp(r'\.0$'), '');
       _commentController.text = widget.transaction!.comment;
       selectedDate = widget.transaction!.date;
       selectedCurrencyCode = widget.transaction!.currency;
@@ -72,6 +76,10 @@ class _AddPageState extends State<AddPage> {
 
   @override
   Widget build(BuildContext context) {
+    return Form(key: _formKey, child: _buildAddPage(context));
+  }
+
+  Widget _buildAddPage(BuildContext context) {
     // Colors extracted/approximated from the image
     final Color surfaceColor = const Color(
       0xFF2C2C2E,
@@ -112,9 +120,10 @@ class _AddPageState extends State<AddPage> {
               TextButton(
                 onPressed: () {
                   final name = _nameController.text;
-                  final amountString = _amountController.text;
+                  final amountString = _amountController.text.replaceAll(',', '');
                   final amount = double.tryParse(amountString) ?? 0.0;
                   final comment = _commentController.text;
+                  _formKey.currentState!.validate();
 
                   if (name.isNotEmpty && amount > 0) {
                     final item = Transaction(
@@ -234,7 +243,7 @@ class _AddPageState extends State<AddPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    TextField(
+                    TextFormField(
                       controller: _nameController,
                       style: const TextStyle(color: Colors.white, fontSize: 16),
                       decoration: const InputDecoration(
@@ -243,6 +252,12 @@ class _AddPageState extends State<AddPage> {
                         hintStyle: TextStyle(color: Colors.grey),
                         //contentPadding: EdgeInsets.only(top: 8),
                       ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter a name';
+                        }
+                        return null;
+                      },
                     ),
                   ],
                 ),
@@ -259,16 +274,34 @@ class _AddPageState extends State<AddPage> {
                 ),
                 child: Column(
                   children: [
-                    TextField(
+                    TextFormField(
                       controller: _amountController,
                       style: const TextStyle(color: Colors.white, fontSize: 16),
-                      keyboardType: TextInputType.number,
+                      keyboardType: TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
+                      // keyboardType: TextInputType.number,
+                      inputFormatters: [
+                        // FilteringTextInputFormatter
+                        //     .digitsOnly, // chỉ cho phép số
+                        // VndSeparatorInputFormatter(),
+                        FilteringTextInputFormatter.allow(
+                          RegExp(r'^[0-9,]*\.?\d{0,2}'),
+                        ), // Chỉ cho phép số, dấu phẩy và 1 dấu chấm thập phân (tối đa 2 chữ số)
+                        UsdThousandsFormatter(),
+                      ], // thêm dấu chấm],
                       decoration: const InputDecoration(
                         border: InputBorder.none,
                         hintText: 'Amount',
                         hintStyle: TextStyle(color: Colors.grey),
                         //contentPadding: EdgeInsets.only(top: 8),
                       ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter an amount';
+                        }
+                        return null;
+                      },
                     ),
                     Divider(thickness: 0.2, height: 0.2, color: Colors.grey),
                     GestureDetector(
