@@ -26,6 +26,7 @@ class AddPage extends StatefulWidget {
     await showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      useSafeArea: true,
       backgroundColor: Colors.transparent,
       builder:
           (context) => AddPage(
@@ -66,7 +67,10 @@ class _AddPageState extends State<AddPage> {
 
     if (widget.transaction != null) {
       isGive = widget.transaction!.isGive;
-      _amountController.text = widget.transaction!.amount.toString().replaceAll(RegExp(r'\.0$'), '');
+      _amountController.text = widget.transaction!.amount.toString().replaceAll(
+        RegExp(r'\.0$'),
+        '',
+      );
       _commentController.text = widget.transaction!.comment;
       selectedDate = widget.transaction!.date;
       selectedCurrencyCode = widget.transaction!.currency;
@@ -120,7 +124,10 @@ class _AddPageState extends State<AddPage> {
               TextButton(
                 onPressed: () {
                   final name = _nameController.text;
-                  final amountString = _amountController.text.replaceAll(',', '');
+                  final amountString = _amountController.text.replaceAll(
+                    ',',
+                    '',
+                  );
                   final amount = double.tryParse(amountString) ?? 0.0;
                   final comment = _commentController.text;
                   _formKey.currentState!.validate();
@@ -287,9 +294,11 @@ class _AddPageState extends State<AddPage> {
                         // VndSeparatorInputFormatter(),
                         FilteringTextInputFormatter.allow(
                           RegExp(r'^[0-9,]*\.?\d{0,2}'),
-                        ), // Chỉ cho phép số, dấu phẩy và 1 dấu chấm thập phân (tối đa 2 chữ số)
+                        ),
+                        // Chỉ cho phép số, dấu phẩy và 1 dấu chấm thập phân (tối đa 2 chữ số)
                         UsdThousandsFormatter(),
-                      ], // thêm dấu chấm],
+                      ],
+                      // thêm dấu chấm],
                       decoration: const InputDecoration(
                         border: InputBorder.none,
                         hintText: 'Amount',
@@ -347,7 +356,9 @@ class _AddPageState extends State<AddPage> {
                                     color:
                                         widget.pageName == null
                                             ? Colors.white
-                                            : Colors.blue.withOpacity(0.5),
+                                            : Colors.blue.withValues(
+                                              alpha: 0.5,
+                                            ),
                                     fontSize: 17,
                                   ),
                                 ),

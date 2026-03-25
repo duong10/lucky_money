@@ -145,8 +145,14 @@ class ItemPage extends StatelessWidget {
             },
           ),
           bottomNavigationBar: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 0),
-            height: MediaQuery.sizeOf(context).height * 0.08,
+            padding: EdgeInsets.only(
+              left: 32,
+              right: 32,
+              bottom: MediaQuery.paddingOf(context).bottom,
+            ),
+            height:
+                MediaQuery.sizeOf(context).height * 0.08 +
+                MediaQuery.paddingOf(context).bottom,
             color: Colors.grey.shade900,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -228,6 +234,7 @@ class ItemPage extends StatelessWidget {
     ObjMoney objMoney,
   ) {
     final width = MediaQuery.sizeOf(context).width * 0.9;
+    final sizeWeight = MediaQuery.sizeOf(context).width * 0.05;
 
     return showModalBottomSheet(
       clipBehavior: Clip.antiAlias,
@@ -239,7 +246,9 @@ class ItemPage extends StatelessWidget {
       ),
       builder: (context) {
         return Padding(
-          padding: const EdgeInsets.only(bottom: 24),
+          padding: EdgeInsets.only(
+            bottom: 24 + MediaQuery.paddingOf(context).bottom,
+          ),
           child: SizedBox(
             height: MediaQuery.sizeOf(context).height * 0.18,
             child: Column(
@@ -284,7 +293,14 @@ class ItemPage extends StatelessWidget {
                     ),
                   ),
                 ),
-                const Divider(thickness: 0.2, height: 0.2, color: Colors.grey),
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: sizeWeight),
+                  child: const Divider(
+                    thickness: 0.2,
+                    height: 0.2,
+                    color: Colors.grey,
+                  ),
+                ),
                 InkWell(
                   onTap: () {
                     Navigator.pop(context);

@@ -6,11 +6,19 @@ import 'package:lucky_money/data/models/obj_money.dart';
 import 'package:lucky_money/presenation/page/add_page.dart';
 import 'package:lucky_money/presenation/page/home_page.dart';
 import 'package:lucky_money/presenation/page/item_page.dart';
+import 'package:lucky_money/presenation/page/splash_page.dart';
 
 abstract class AppRouter {
   static GoRouter appRouter = GoRouter(
-    initialLocation: AppRouterLocation.home.path,
+    initialLocation: AppRouterLocation.root.path,
     routes: [
+      GoRoute(
+        path: AppRouterLocation.root.path,
+        name: AppRouterLocation.root.name,
+        pageBuilder:
+            (context, state) =>
+                buildPage(child: const SplashPage(), state: state),
+      ),
       GoRoute(
         path: AppRouterLocation.home.path,
         name: AppRouterLocation.home.name,

@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:lucky_money/app/navigation/router.dart';
@@ -17,7 +18,12 @@ void main() async {
               (await getApplicationDocumentsDirectory()).path,
             ),
   );
-  runApp(const LuckyMoney());
+  SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]).then((_) {
+    runApp(const LuckyMoney());
+  });
 }
 
 class LuckyMoney extends StatefulWidget {

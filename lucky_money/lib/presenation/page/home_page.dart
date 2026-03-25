@@ -151,8 +151,13 @@ class _HomePageState extends State<HomePage> {
             },
           ),
           bottomNavigationBar: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 0),
-            height: MediaQuery.sizeOf(context).height * 0.08,
+            padding: EdgeInsets.only(
+              left: 32,
+              right: 32,
+              bottom: MediaQuery.paddingOf(context).bottom,
+            ),
+            height: MediaQuery.sizeOf(context).height * 0.08 +
+                MediaQuery.paddingOf(context).bottom,
             color: Colors.grey.shade900,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
